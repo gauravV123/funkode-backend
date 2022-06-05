@@ -6,9 +6,14 @@ const router = express.Router();
 router.param('id', tourController.checkID);
 
 router
+  .route('/get-5-tours')
+  .get(tourController.aliasTours, tourController.getAllTours)
+
+
+router
   .route('/')
   .get(tourController.getAllTours)
-  .post( tourController.updateAllToursByOneUsingPost);
+  .post(tourController.updateAllToursByOneUsingPost);
 
 router
   .route('/:id')

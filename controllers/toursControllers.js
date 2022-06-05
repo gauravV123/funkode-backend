@@ -3,6 +3,14 @@ const Tour = require("../models/tourModel");
 
 // const tours = JSON.parse(fs.readFileSync("./dev-data/data/tours-simple.json"));
 
+exports.aliasTours = (req, res, next) => {
+  
+  req.query.limit= '5';
+  req.query.sort= 'name -ratingsAverage price';
+  req.query.fields= 'name price ratingsAverage summary difficulty';
+  next();
+}
+
 exports.checkID = (req, res, next, val) => {
   // if (+val > tours.length) {
   //   res.status(202).json({
@@ -24,7 +32,34 @@ exports.checkID = (req, res, next, val) => {
 exports.getAllTours = async (req, res) => {
 
   try {
-    const tours = await Tour.find(req.query);
+    console.log(req.query)
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach(el => delete queryObj[el]);
+
+    let query = Tour.find(JSON.parse(JSON.stringify(req.query)));
+
+    //SORTING
+    if (req.query.sort) {
+      query = query.sort(req.query.sort);
+    } else {
+      query = query.sort('-createdAt')
+    }
+    //FIELDS
+    if (req.query.fields) {
+      query = query.select(req.query.fields);
+    }
+
+    //PAGINATION
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 3;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+
+    const tours = await query;
+    // if(!tours.data){
+    //   throw new Error('Error hai vro')
+    // }
     res.status(200).json({
       status: "success",
       results: tours.length,
@@ -35,7 +70,7 @@ exports.getAllTours = async (req, res) => {
   } catch (err) {
     res.status(400).json({
       status: "fail",
-      message: "Some error occured"
+      message: err
     })
   }
 };
