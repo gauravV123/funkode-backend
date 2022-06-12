@@ -5,7 +5,9 @@ const port = 3000;
 
 dotenv.config({ path: "./.config.env" });
 
-mongoose.connect(process.env.DATABASE_LOCAL);
+mongoose.connect(process.env.DATABASE).then(()=>{
+  console.log('DB connected successfully!!!');
+});
 
 app.listen(port, () => {
   console.log(`App running on port ${port}`);
