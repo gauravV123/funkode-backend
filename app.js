@@ -5,10 +5,13 @@ const app = express();
 app.use(express.json());
 app.use(morgan('tiny'));
 
-app.use((req, res, next) => {
-  console.log('Hello from the middleware');
-  next();
-});
+const AppError = require('./utils/appError');
+const globalErrorController = require('./controllers/errorController');
+
+// app.use((req, res, next) => {
+//   console.log('Hello from the middleware');
+//   next();
+// });
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -16,103 +19,128 @@ const userRouter = require('./routes/userRoutes');
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
-app.all('*', (req, res, next)=>{
-  res.status(404).json({
-    status:'fail',
-    message:`Cant find ${req.originalUrl} on this server`
-  })
-  next();
+app.all('*', (req, res, next) => {
+  // res.status(404).json({
+  //   status: 404,
+  //   message: `Cannt find ${req.originalUrl} on this server`,
+  // });
+
+  // const err = new Error(`Can't find ${req.originalUrl} on this server`);
+  // err.status = 'fail';
+  // err.statusCode = 404;
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
+
+app.use(globalErrorController);
 
 module.exports = app;
 
-//-----------CLOSURES
+// //-----------CLOSURES
 
-// const heavyDuty = (index) => {
-//   const bigArray = new Array(10000).fill('😀');
-//   console.log('created!!!');
-//   return bigArray[in  dex];
-// };
+// // const heavyDuty = (index) => {
+// //   const bigArray = new Array(10000).fill('😀');
+// //   console.log('created!!!');
+// //   return bigArray[in  dex];
+// // };
 
-// console.log(heavyDuty(688));
-// console.log(heavyDuty(800));
-// console.log(heavyDuty(900));
+// // console.log(heavyDuty(688));
+// // console.log(heavyDuty(800));
+// // console.log(heavyDuty(900));
 
-// const heavyDuty2 = (index) => {
-//   const bigArray = new Array(10000).fill('😀');
-//   console.log('created Again!!!');
-//   return (index) => {
-//     return bigArray[index];
-//   };
-// };
+// // const heavyDuty2 = (index) => {
+// //   const bigArray = new Array(10000).fill('😀');
+// //   console.log('created Again!!!');
+// //   return (index) => {
+// //     return bigArray[index];
+// //   };
+// // };
 
-// const getHeavyDuty = heavyDuty2();
-// console.log(getHeavyDuty(600));
-// console.log(getHeavyDuty(800));
-// console.log(getHeavyDuty(600));
+// // const getHeavyDuty = heavyDuty2();
+// // console.log(getHeavyDuty(600));
+// // console.log(getHeavyDuty(800));
+// // console.log(getHeavyDuty(600));
 
-//-------Encapsulation(closures)
+// //-------Encapsulation(closures)
 
-// const makeNuclearButton = () => {
-//   let timeWithoutDestruction = 0;
-//   const passTime = () => timeWithoutDestruction++;
-//   const totalPeaceTime = () => timeWithoutDestruction;
-//   const launch = () => {
-//     timeWithoutDestruction -= 1;
-//     return '🔥';
-//   };
-//   setInterval(passTime, 1000);
-//   return {
-//     launch,
-//     totalPeaceTime,
-//   };
-// };
+// // const makeNuclearButton = () => {
+// //   let timeWithoutDestruction = 0;
+// //   const passTime = () => timeWithoutDestruction++;
+// //   const totalPeaceTime = () => timeWithoutDestruction;
+// //   const launch = () => {
+// //     timeWithoutDestruction -= 1;
+// //     return '🔥';
+// //   };
+// //   setInterval(passTime, 1000);
+// //   return {
+// //     launch,
+// //     totalPeaceTime,
+// //   };
+// // };
 
-// const ohno = makeNuclearButton();
-// console.log(ohno.totalPeaceTime());
+// // const ohno = makeNuclearButton();
+// // console.log(ohno.totalPeaceTime());
 
-//------------------
+// //------------------
 
-// var a= "hi";
-// const sample=()=> {
-//     console.log ("original", a);
-//      var a= "bye";
-//     console.log("new", a);
+// // var a= "hi";
+// // const sample=()=> {
+// //     console.log ("original", a);
+// //      var a= "bye";
+// //     console.log("new", a);
 
+// // }
+// // sample();
+// // console.log(a);
+// //'use strict'
+
+// // const a = function () {
+// //   console.log('a', this);
+// //   const b = function () {
+// //     console.log('b', this);
+// //     const c = {
+// //       hi: function () {
+// //         console.log('c', this);
+// //       },
+// //     };
+// //     c.hi();
+// //   };
+// //   b();
+// // };
+// // a();
+
+// // const obj = {
+// //   name: 'happy',
+// //   sing() {
+// //     console.log('a', this);
+// //     var anotherFunc = () => {
+// //       console.log('b', this);
+// //     };
+// //     anotherFunc();
+// //   },
+// // };
+// // obj.sing();
+
+// // function a( ) {
+// //   return this;
+// // }
+// // console.log(a.call());
+
+// function sum(num1, num2= 2, num3= 3){
+//   console.log(num1+num2+num3)
 // }
-// sample();
-// console.log(a);
-//'use strict'
 
-// const a = function () {
-//   console.log('a', this);
-//   const b = function () {
-//     console.log('b', this);
-//     const c = {
-//       hi: function () {
-//         console.log('c', this);
-//       },
-//     };
-//     c.hi();
-//   };
-//   b();
-// };
-// a();
+// sum(4, 1, 5);
 
-// const obj = {
-//   name: 'happy',
-//   sing() {
-//     console.log('a', this);
-//     var anotherFunc = () => {
-//       console.log('b', this);
-//     };
-//     anotherFunc();
-//   },
-// };
-// obj.sing();
-
-
-// function a( ) {
-//   return this;
+// const myFunc= ()=>{
+//   const a= 2;
+//   return ()=>console.log('a is ', a);
 // }
-// console.log(a.call());
+// const a= 1;
+// const test= myFunc();
+// test()
+
+// console.log("I")
+// setTimeout(()=>{
+//   console.log("love")
+// },0)
+// console.log('Java')
