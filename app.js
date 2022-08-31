@@ -8,16 +8,11 @@ app.use(morgan('dev'));
 const AppError = require('./utils/appError');
 const globalErrorController = require('./controllers/errorController');
 
-// app.use((req, res, next) => {
-//   console.log('Hello from the middleware');
-//   next();
-// });
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  // console.log("time", x);
+  console.log(req.headers);
   next();
 });
-
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -36,7 +31,6 @@ app.all('*', (req, res, next) => {
   // err.statusCode = 404;
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
-
 
 app.use(globalErrorController);
 
