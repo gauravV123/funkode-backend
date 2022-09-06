@@ -1,10 +1,13 @@
 const express = require('express');
 const tourController = require('../controllers/toursControllers');
 const authController = require('../controllers/authController');
+const reviewRouter = require('./reviewRoutes');
 const router = express.Router();
 // app.use('/api/v1/tours', router);
 
 router.param('id', tourController.checkID);
+
+router.use('/:tourId/reviews', reviewRouter);
 
 router.route('/get-5-tours').get(tourController.aliasTours, tourController.getAllTours);
 
@@ -22,5 +25,6 @@ router
   .get(tourController.getTourByID)
   .patch(tourController.updateToursByOne)
   .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), tourController.deleteTour);
+
 
 module.exports = router;

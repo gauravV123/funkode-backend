@@ -116,6 +116,14 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+//virtual populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
+////////////////////////////
 //embedded data
 // tourSchema.pre('save', async function (next) {
 //   const guides = this.guides.map(async (id) => await User.findById(id));
