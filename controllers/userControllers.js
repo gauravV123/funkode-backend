@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { deleteOne, updateDoc, getDocumentById } = require('./handleFactory');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const { catchAsync } = require('../utils/catchAsync');
@@ -12,6 +13,10 @@ filteredObj = (obj, ...allowedProp) => {
   });
   return newObj;
 };
+
+exports.getUserNameByID = getDocumentById(User);
+exports.updateUser = updateDoc(User);
+exports.deleteMe = deleteOne(User);
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
@@ -31,29 +36,11 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteMe = catchAsync(async (req, res, next) => {
-  await User.findByIdAndUpdate(req.user.id, {
-    active: false,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: null,
-  });
-});
-
 exports.getUsersName = catchAsync(async (req, res) => {
   const users = await User.find({ active: true });
   res.status(200).json({
     status: 'success',
     total: users.length,
     users,
-  });
-});
-
-exports.getUserNameByID = catchAsync(async (req, res) => {
-  const user = await User.findById(req.params.id);
-  res.status(200).json({
-    name: user.name,
   });
 });

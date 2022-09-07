@@ -1,5 +1,11 @@
+const { deleteOne, updateDoc, getDocumentById, createDocument } = require('./handleFactory');
 const Reviews = require('../models/reviewModel');
 const { catchAsync } = require('../utils/catchAsync');
+
+exports.createReview = createDocument(Reviews);
+exports.getReviewById = getDocumentById(Reviews);
+exports.deleteReview = deleteOne(Reviews);
+exports.updateReview = updateDoc(Reviews);
 
 exports.getAllReviews = catchAsync(async (req, res, next) => {
   let filter = {};
@@ -14,27 +20,9 @@ exports.getAllReviews = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createReview = catchAsync(async (req, res, next) => {
+exports.setReviewID = (req, res, next) => {
   //Allow nested routes
   if (!req.body.tour) req.body.tour = req.params.tourId;
   if (!req.body.user) req.body.user = req.user.id;
-
-  const newReview = await Reviews.create(req.body);
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      newReview,
-    },
-  });
-});
-
-exports.getReviewById = catchAsync(async (req, res, next) => {
-  const review = await Reviews.findById(req.params.id);
-  res.status(201).json({
-    status: 'success',
-    data: {
-      review,
-    },
-  });
-});
+  next();
+};

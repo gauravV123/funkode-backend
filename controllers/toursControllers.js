@@ -1,6 +1,7 @@
 const Users = require('../models/userModel');
 const Tour = require('../models/tourModel');
 const { catchAsync } = require('../utils/catchAsync');
+const { deleteOne, updateDoc, getDocumentById, createDocument } = require('./handleFactory');
 
 exports.aliasTours = (req, res, next) => {
   next();
@@ -10,93 +11,37 @@ exports.checkID = (req, res, next, val) => {
   next();
 };
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await Users.find();
+exports.updateAllToursByOneUsingPost = createDocument(Tour);
+exports.getTourByID = getDocumentById(Tour, 'reviews');
+exports.updateToursByOne = updateDoc(Tour);
+exports.deleteTour = deleteOne(Tour);
+
+exports.getAllTours = catchAsync(async (req, res) => {
+  const queryObj = { ...req.query };
+  const excludedFields = ['page', 'sort', 'limit', 'fields'];
+  excludedFields.forEach((el) => delete queryObj[el]);
+
+  let query = Tour.find(JSON.parse(JSON.stringify(req.query)));
+  if (req.query.sort) {
+    query = query.sort(req.query.sort);
+  } else {
+    query = query.sort('-createdAt');
+  }
+  if (req.query.fields) {
+    query = query.select(req.query.fields);
+  }
+
+  const tours = await query;
   res.status(200).json({
     status: 'success',
-    results: users.length,
+    results: tours.length,
     data: {
-      users,
+      tours,
     },
   });
-});
-
-exports.getAllTours = async (req, res) => {
-  try {
-    const queryObj = { ...req.query };
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach((el) => delete queryObj[el]);
-
-    let query = Tour.find(JSON.parse(JSON.stringify(req.query)));
-    if (req.query.sort) {
-      query = query.sort(req.query.sort);
-    } else {
-      query = query.sort('-createdAt');
-    }
-    if (req.query.fields) {
-      query = query.select(req.query.fields);
-    }
-
-    const tours = await query;
-    res.status(200).json({
-      status: 'success',
-      results: tours.length,
-      data: {
-        tours,
-      },
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
-
-exports.getTourByID = async (req, res) => {
-  const id = +req.params.id;
-  try {
-    const tour = await Tour.findById(req.params.id).populate('reviews');
-    res.status(200).json({
-      status: 'success',
-      tour,
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
-
-exports.updateToursByOne = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.updateAllToursByOneUsingPost = catchAsync(async (req, res) => {
-  const newTour = await Tour.create(req.body);
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res) => {
-  await Tour.findByIdAndDelete(req.params.id);
-  res.status(204).json({
-    status: 'success',
-    data: Tour,
+  res.status(400).json({
+    status: 'fail',
+    message: err,
   });
 });
 

@@ -13,8 +13,8 @@ router.post('/login', authController.login);
 router.patch('/resetPassword/:token', authController.resetPassword);
 router.patch('/updatePassword', authController.protect, authController.updatePassword);
 router.patch('/updateMe', authController.protect, userController.updateMe);
-router.patch('/deleteMe', authController.protect, userController.deleteMe);
+router.delete('/deleteMe/:id', authController.protect, userController.deleteMe);
 router.route('/').get(userController.getUsersName);
-router.route('/:id').get(userController.getUserNameByID);
+router.route('/:id').get(userController.getUserNameByID).patch(authController.protect, userController.updateUser);
 
 module.exports = router;
