@@ -1,18 +1,46 @@
 const fs = require('fs');
+const { deleteOne, updateDoc, getDocumentById } = require('./handleFactory');
+const User = require('../models/userModel');
+const AppError = require('../utils/appError');
+const { catchAsync } = require('../utils/catchAsync');
 
 const tours = JSON.parse(fs.readFileSync('./dev-data/data/tours-simple.json'));
 
-exports.getUsersName = (req, res) => {
-  console.log('hello');
-  const users = tours.map((item) => item.name);
-  res.status(200).json({
-    users,
+filteredObj = (obj, ...allowedProp) => {
+  const newObj = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowedProp.includes(el)) newObj[el] = obj[el];
   });
+  return newObj;
 };
 
-exports.getUserNameByID = (req, res) => {
-  const user = tours.filter((item) => +req.params.id === item.id)[0].name;
-  res.status(200).json({
-    name: user,
+exports.getUserNameByID = getDocumentById(User);
+exports.updateUser = updateDoc(User);
+exports.deleteMe = deleteOne(User);
+
+exports.updateMe = catchAsync(async (req, res, next) => {
+  if (req.body.password || req.body.passwordConfirm) {
+    return next(new AppError('Invalid route to update password', 400));
+  }
+  const filteredBody = filteredObj(req.body, 'name', 'email');
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+    new: true,
+    runValidators: true,
   });
-};
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser,
+    },
+  });
+});
+
+exports.getUsersName = catchAsync(async (req, res) => {
+  const users = await User.find({ active: true });
+  res.status(200).json({
+    status: 'success',
+    total: users.length,
+    users,
+  });
+});
