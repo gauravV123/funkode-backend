@@ -18,6 +18,12 @@ exports.getUserNameByID = getDocumentById(User);
 exports.updateUser = updateDoc(User);
 exports.deleteMe = deleteOne(User);
 
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  console.log({ id: req.params.id });
+  next();
+};
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm) {
     return next(new AppError('Invalid route to update password', 400));

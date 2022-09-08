@@ -31,7 +31,7 @@ exports.getAllTours = catchAsync(async (req, res) => {
     query = query.select(req.query.fields);
   }
 
-  const tours = await query;
+  const tours = await query.explain();
   res.status(200).json({
     status: 'success',
     results: tours.length,
